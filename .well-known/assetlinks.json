@@ -1,39 +1,14 @@
-// Address bar lukanor jonno (TWA verify): apnar app er signing fingerprint diye assetlinks.json banay.
-// Chalan:  node make-assetlinks.js   (APK ekbar build howar por, jate debug.keystore toiri thake)
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const { execFileSync } = require('child_process');
-
-const cap = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8'));
-const ks = process.argv[2] || path.join(os.homedir(), '.android', 'debug.keystore');
-if (!fs.existsSync(ks)) {
-  console.log('debug.keystore paoa jay nai: ' + ks);
-  console.log('Age ekbar APK build korun (cd android, gradlew assembleDebug), tarpor abar: node make-assetlinks.js');
-  process.exit(1);
-}
-const candidates = ['keytool',
-  'C:\\Program Files\\Android\\Android Studio\\jbr\\bin\\keytool.exe',
-  'C:\\Program Files\\Android\\Android Studio\\jre\\bin\\keytool.exe',
-  'C:\\Program Files\\Java\\jdk-17\\bin\\keytool.exe'];
-let out = null;
-for (const k of candidates) {
-  try {
-    out = execFileSync(k, ['-list', '-v', '-keystore', ks, '-alias', 'androiddebugkey', '-storepass', 'android', '-keypass', 'android'], { encoding: 'utf8' });
-    break;
-  } catch (e) { /* next */ }
-}
-if (!out) { console.log('keytool paoa jay nai. Android Studio install thakle: C:\\Program Files\\Android\\Android Studio\\jbr\\bin\\keytool.exe'); process.exit(1); }
-const m = /SHA-?256:\s*([0-9A-Fa-f:]{95})/.exec(out);
-if (!m) { console.log('SHA256 fingerprint paoa jay nai.\n' + out); process.exit(1); }
-const fp = m[1].toUpperCase();
-const json = [{
-  relation: ['delegate_permission/common.handle_all_urls'],
-  target: { namespace: 'android_app', package_name: cap.appId, sha256_cert_fingerprints: [fp] }
-}];
-fs.mkdirSync('github-user-site/.well-known', { recursive: true });
-fs.writeFileSync('github-user-site/.well-known/assetlinks.json', JSON.stringify(json, null, 2));
-fs.writeFileSync('github-user-site/.nojekyll', '');
-console.log('Fingerprint: ' + fp);
-console.log('Toiri holo: github-user-site/.well-known/assetlinks.json  ar  github-user-site/.nojekyll');
-console.log('Ei 2 ta file GitHub e "fahimhossain454558-ai.github.io" naam er repo te upload korun (STEPS.txt dekhun).');
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.fahim.bdlicense",
+      "sha256_cert_fingerprints": [
+        "A7:67:A8:89:C6:C2:12:EC:04:5A:54:4A:82:37:71:1C:51:69:AD:11:65:6D:63:CE:69:0F:DA:DF:44:C3:69:E7"
+      ]
+    }
+  }
+]
